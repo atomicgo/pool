@@ -3,6 +3,7 @@ package pool
 import (
 	"context"
 	"errors"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -10,6 +11,9 @@ import (
 // Config struct defines the configuration parameters for the Pool.
 // - MaxWorkers: The maximum number of concurrent workers in the pool.
 // - Timeout: The maximum duration for processing a single task. If a task takes longer, it will be terminated.
+//
+// If the Timeout is set to 0, tasks will not be terminated. This is the default behavior.
+// If MaxWorkers is set to 0, it will be set to the number of logical CPUs on the machine.
 type Config struct {
 	MaxWorkers int
 	Timeout    time.Duration
@@ -36,6 +40,11 @@ type Pool[T any] struct {
 // - config: Configuration settings for the pool, including max workers and task timeout.
 func New[T any](config Config) *Pool[T] {
 	ctx, cancel := context.WithCancel(context.Background())
+
+	if config.MaxWorkers == 0 {
+		config.MaxWorkers = runtime.NumCPU()
+	}
+
 	return &Pool[T]{
 		config: config,
 		queue:  make(chan T),
