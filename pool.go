@@ -2,6 +2,7 @@ package pool
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 )
@@ -64,46 +65,53 @@ func (p *Pool[T]) SetErrorHandler(handler ErrorHandler[T]) *Pool[T] {
 func (p *Pool[T]) Start() {
 	for i := 0; i < p.config.MaxWorkers; i++ {
 		p.wg.Add(1)
-		go func() {
-			defer p.wg.Done()
-			for {
-				select {
-				case item, ok := <-p.queue:
-					if !ok {
-						return // Stop the goroutine if the queue is closed
-					}
+		go p.worker()
+	}
+}
 
-					// Create a timeout context for each task
-					workerCtx, cancel := context.WithTimeout(p.ctx, p.config.Timeout)
-					defer cancel()
-
-					// Run the handler in a separate goroutine to enable timeout control
-					done := make(chan struct{})
-					var err error
-					go func() {
-						err = p.handler(workerCtx, item)
-						close(done)
-					}()
-
-					// Wait for the task to complete or for the timeout
-					select {
-					case <-workerCtx.Done():
-						// Timeout occurred, handle the timeout error
-						if p.errorHandler != nil {
-							p.errorHandler(workerCtx.Err(), p)
-						}
-					case <-done:
-						// Task completed, handle any error returned by the handler
-						if err != nil && p.errorHandler != nil {
-							p.errorHandler(err, p)
-						}
-					}
-
-				case <-p.ctx.Done():
-					return // Stop the goroutine if the context is cancelled
-				}
+func (p *Pool[T]) worker() {
+	defer p.wg.Done()
+	for {
+		select {
+		case item, ok := <-p.queue:
+			if !ok {
+				return
 			}
-		}()
+			p.processTask(item)
+		case <-p.ctx.Done():
+			return
+		}
+	}
+}
+
+func (p *Pool[T]) processTask(item T) {
+	var workerCtx context.Context
+	var cancel context.CancelFunc
+	if p.config.Timeout > 0 {
+		workerCtx, cancel = context.WithTimeout(p.ctx, p.config.Timeout)
+	} else {
+		workerCtx, cancel = context.WithCancel(p.ctx)
+	}
+	defer cancel()
+
+	done := make(chan error)
+	go func() {
+		done <- p.handler(workerCtx, item)
+	}()
+
+	select {
+	case <-workerCtx.Done():
+		if !errors.Is(workerCtx.Err(), context.Canceled) {
+			p.handleError(workerCtx.Err())
+		}
+	case err := <-done:
+		p.handleError(err)
+	}
+}
+
+func (p *Pool[T]) handleError(err error) {
+	if err != nil && p.errorHandler != nil {
+		p.errorHandler(err, p)
 	}
 }
 
