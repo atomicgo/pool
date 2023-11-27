@@ -32,7 +32,7 @@ type Pool[T any] struct {
 	queue        chan T
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
-	ctx          context.Context
+	ctx          context.Context // nolint
 }
 
 // New creates and returns a new pool with the specified configuration.
@@ -46,10 +46,13 @@ func New[T any](config Config) *Pool[T] {
 	}
 
 	return &Pool[T]{
-		config: config,
-		queue:  make(chan T),
-		cancel: cancel,
-		ctx:    ctx,
+		config:       config,
+		handler:      nil,
+		errorHandler: nil,
+		queue:        make(chan T),
+		cancel:       cancel,
+		wg:           sync.WaitGroup{},
+		ctx:          ctx,
 	}
 }
 
@@ -80,12 +83,14 @@ func (p *Pool[T]) Start() {
 
 func (p *Pool[T]) worker() {
 	defer p.wg.Done()
+
 	for {
 		select {
 		case item, ok := <-p.queue:
 			if !ok {
 				return
 			}
+
 			p.processTask(item)
 		case <-p.ctx.Done():
 			return
@@ -94,13 +99,17 @@ func (p *Pool[T]) worker() {
 }
 
 func (p *Pool[T]) processTask(item T) {
-	var workerCtx context.Context
-	var cancel context.CancelFunc
+	var (
+		workerCtx context.Context
+		cancel    context.CancelFunc
+	)
+
 	if p.config.Timeout > 0 {
 		workerCtx, cancel = context.WithTimeout(p.ctx, p.config.Timeout)
 	} else {
 		workerCtx, cancel = context.WithCancel(p.ctx)
 	}
+
 	defer cancel()
 
 	done := make(chan error)
