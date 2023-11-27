@@ -1,9 +1,5 @@
 /*
-Package template is used to generate new AtomicGo repositories.
-
-Write the description of the module here. You can use **markdown**!
-This description should clearly explain what the package does.
-
-Example description: https://golang.org/src/encoding/gob/doc.go
+Package pool provides a generic and concurrent worker pool implementation.
+It allows you to enqueue tasks and process them using a fixed number of workers.
 */
-package template
+package pool
