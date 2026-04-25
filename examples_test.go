@@ -1,11 +1,12 @@
 package pool_test
 
 import (
-	"atomicgo.dev/pool"
 	"context"
 	"fmt"
 	"log"
 	"time"
+
+	"atomicgo.dev/pool"
 )
 
 func Example_demo() {
@@ -18,6 +19,7 @@ func Example_demo() {
 	p.SetHandler(func(ctx context.Context, i int) error {
 		log.Printf("Processing %d", i)
 		time.Sleep(time.Second)
+
 		return nil
 	})
 
@@ -79,6 +81,7 @@ func Example_timeout() {
 	p.SetHandler(func(ctx context.Context, i int) error {
 		log.Printf("Processing %d", i)
 		time.Sleep(time.Second * 3) // This sleep is longer than the timeout
+
 		return nil
 	})
 

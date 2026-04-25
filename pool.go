@@ -77,6 +77,7 @@ func (p *Pool[T]) SetErrorHandler(handler ErrorHandler[T]) *Pool[T] {
 func (p *Pool[T]) Start() {
 	for i := 0; i < p.config.MaxWorkers; i++ {
 		p.wg.Add(1)
+
 		go p.worker()
 	}
 }
@@ -92,6 +93,7 @@ func (p *Pool[T]) worker() {
 			}
 
 			p.processTask(item)
+
 		case <-p.ctx.Done():
 			return
 		}
@@ -113,6 +115,7 @@ func (p *Pool[T]) processTask(item T) {
 	defer cancel()
 
 	done := make(chan error)
+
 	go func() {
 		done <- p.handler(workerCtx, item)
 	}()
@@ -122,6 +125,7 @@ func (p *Pool[T]) processTask(item T) {
 		if !errors.Is(workerCtx.Err(), context.Canceled) {
 			p.handleError(workerCtx.Err())
 		}
+
 	case err := <-done:
 		p.handleError(err)
 	}
