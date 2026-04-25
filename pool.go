@@ -32,14 +32,14 @@ type Pool[T any] struct {
 	queue        chan T
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
-	ctx          context.Context // nolint
+	ctx          context.Context //nolint:containedctx // The pool owns this lifecycle context.
 }
 
 // New creates and returns a new pool with the specified configuration.
 // It initializes the internal structures but does not start the worker goroutines.
 // - config: Configuration settings for the pool, including max workers and task timeout.
 func New[T any](config Config) *Pool[T] {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background()) //nolint:gosec // cancel is stored and called by Kill.
 
 	if config.MaxWorkers == 0 {
 		config.MaxWorkers = runtime.NumCPU()

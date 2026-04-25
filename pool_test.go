@@ -63,7 +63,7 @@ func testPool(t *testing.T, config Config, writeSpeed time.Duration, shouldPass 
 	p := New[int](config)
 
 	// Set the task handler to process integers
-	p.SetHandler(func(ctx context.Context, i int) error {
+	p.SetHandler(func(_ context.Context, i int) error {
 		// Simulate write speed
 		if writeSpeed > 0 {
 			time.Sleep(writeSpeed)
@@ -82,7 +82,7 @@ func testPool(t *testing.T, config Config, writeSpeed time.Duration, shouldPass 
 	var hasErrors bool
 
 	// Set error handler
-	p.SetErrorHandler(func(err error, p *Pool[int]) {
+	p.SetErrorHandler(func(_ error, _ *Pool[int]) {
 		hasErrors = true
 	})
 
@@ -97,7 +97,7 @@ func testPool(t *testing.T, config Config, writeSpeed time.Duration, shouldPass 
 	// Close the pool and wait for all tasks to complete
 	p.Close()
 
-	m.Range(func(key, value interface{}) bool {
+	m.Range(func(_, value interface{}) bool {
 		if !value.(bool) && shouldPass {
 			t.Errorf("Expected map value to be true, got false")
 		} else if value.(bool) && !shouldPass {
