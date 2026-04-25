@@ -96,10 +96,11 @@ Package pool provides a generic and concurrent worker pool implementation. It al
 package main
 
 import (
-	"atomicgo.dev/pool"
 	"context"
 	"log"
 	"time"
+
+	"atomicgo.dev/pool"
 )
 
 func main() {
@@ -112,6 +113,7 @@ func main() {
 	p.SetHandler(func(ctx context.Context, i int) error {
 		log.Printf("Processing %d", i)
 		time.Sleep(time.Second)
+
 		return nil
 	})
 
@@ -138,10 +140,11 @@ func main() {
 package main
 
 import (
-	"atomicgo.dev/pool"
 	"context"
 	"fmt"
 	"log"
+
+	"atomicgo.dev/pool"
 )
 
 func main() {
@@ -190,10 +193,11 @@ func main() {
 package main
 
 import (
-	"atomicgo.dev/pool"
 	"context"
 	"log"
 	"time"
+
+	"atomicgo.dev/pool"
 )
 
 func main() {
@@ -207,6 +211,7 @@ func main() {
 	p.SetHandler(func(ctx context.Context, i int) error {
 		log.Printf("Processing %d", i)
 		time.Sleep(time.Second * 3) // This sleep is longer than the timeout
+
 		return nil
 	})
 
@@ -283,7 +288,7 @@ func New[T any](config Config) *Pool[T]
 New creates and returns a new pool with the specified configuration. It initializes the internal structures but does not start the worker goroutines. \- config: Configuration settings for the pool, including max workers and task timeout.
 
 <a name="Pool[T].Add"></a>
-### func \(\*Pool\[T\]\) [Add](<https://github.com/atomicgo/pool/blob/main/pool.go#L139>)
+### func \(\*Pool\[T\]\) [Add](<https://github.com/atomicgo/pool/blob/main/pool.go#L143>)
 
 ```go
 func (p *Pool[T]) Add(item T)
@@ -292,7 +297,7 @@ func (p *Pool[T]) Add(item T)
 Add enqueues a task into the pool. If the pool's worker goroutines are running, the task will be picked up for processing. If the pool is not running or has been closed, the behavior of Add is undefined and may result in a deadlock or panic. \- item: The task to be added to the pool for processing.
 
 <a name="Pool[T].Close"></a>
-### func \(\*Pool\[T\]\) [Close](<https://github.com/atomicgo/pool/blob/main/pool.go#L145>)
+### func \(\*Pool\[T\]\) [Close](<https://github.com/atomicgo/pool/blob/main/pool.go#L149>)
 
 ```go
 func (p *Pool[T]) Close()
@@ -301,7 +306,7 @@ func (p *Pool[T]) Close()
 Close gracefully shuts down the pool. It stops accepting new tasks and waits for all ongoing tasks to complete. This method should be called to ensure a clean shutdown of the pool.
 
 <a name="Pool[T].Kill"></a>
-### func \(\*Pool\[T\]\) [Kill](<https://github.com/atomicgo/pool/blob/main/pool.go#L152>)
+### func \(\*Pool\[T\]\) [Kill](<https://github.com/atomicgo/pool/blob/main/pool.go#L156>)
 
 ```go
 func (p *Pool[T]) Kill()
