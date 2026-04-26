@@ -31,6 +31,7 @@ type Pool[T any] struct {
 	errorHandler ErrorHandler[T]
 	queue        chan T
 	cancel       context.CancelFunc
+	errorMu      sync.Mutex
 	wg           sync.WaitGroup
 	ctx          context.Context //nolint:containedctx // The pool owns this lifecycle context.
 }
@@ -51,6 +52,7 @@ func New[T any](config Config) *Pool[T] {
 		errorHandler: nil,
 		queue:        make(chan T),
 		cancel:       cancel,
+		errorMu:      sync.Mutex{},
 		wg:           sync.WaitGroup{},
 		ctx:          ctx,
 	}
@@ -133,6 +135,9 @@ func (p *Pool[T]) processTask(item T) {
 
 func (p *Pool[T]) handleError(err error) {
 	if err != nil && p.errorHandler != nil {
+		p.errorMu.Lock()
+		defer p.errorMu.Unlock()
+
 		p.errorHandler(err, p)
 	}
 }
