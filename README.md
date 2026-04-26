@@ -268,7 +268,7 @@ type ErrorHandler[T any] func(error, *Pool[T])
 ```
 
 <a name="Pool"></a>
-## type [Pool](<https://github.com/atomicgo/pool/blob/main/pool.go#L28-L36>)
+## type [Pool](<https://github.com/atomicgo/pool/blob/main/pool.go#L28-L37>)
 
 Pool struct represents a pool of workers processing tasks of type T. It encapsulates the task handling logic, error handling, and synchronization mechanisms.
 
@@ -279,7 +279,7 @@ type Pool[T any] struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/atomicgo/pool/blob/main/pool.go#L41>)
+### func [New](<https://github.com/atomicgo/pool/blob/main/pool.go#L42>)
 
 ```go
 func New[T any](config Config) *Pool[T]
@@ -288,7 +288,7 @@ func New[T any](config Config) *Pool[T]
 New creates and returns a new pool with the specified configuration. It initializes the internal structures but does not start the worker goroutines. \- config: Configuration settings for the pool, including max workers and task timeout.
 
 <a name="Pool[T].Add"></a>
-### func \(\*Pool\[T\]\) [Add](<https://github.com/atomicgo/pool/blob/main/pool.go#L143>)
+### func \(\*Pool\[T\]\) [Add](<https://github.com/atomicgo/pool/blob/main/pool.go#L148>)
 
 ```go
 func (p *Pool[T]) Add(item T)
@@ -297,7 +297,7 @@ func (p *Pool[T]) Add(item T)
 Add enqueues a task into the pool. If the pool's worker goroutines are running, the task will be picked up for processing. If the pool is not running or has been closed, the behavior of Add is undefined and may result in a deadlock or panic. \- item: The task to be added to the pool for processing.
 
 <a name="Pool[T].Close"></a>
-### func \(\*Pool\[T\]\) [Close](<https://github.com/atomicgo/pool/blob/main/pool.go#L149>)
+### func \(\*Pool\[T\]\) [Close](<https://github.com/atomicgo/pool/blob/main/pool.go#L154>)
 
 ```go
 func (p *Pool[T]) Close()
@@ -306,7 +306,7 @@ func (p *Pool[T]) Close()
 Close gracefully shuts down the pool. It stops accepting new tasks and waits for all ongoing tasks to complete. This method should be called to ensure a clean shutdown of the pool.
 
 <a name="Pool[T].Kill"></a>
-### func \(\*Pool\[T\]\) [Kill](<https://github.com/atomicgo/pool/blob/main/pool.go#L156>)
+### func \(\*Pool\[T\]\) [Kill](<https://github.com/atomicgo/pool/blob/main/pool.go#L161>)
 
 ```go
 func (p *Pool[T]) Kill()
@@ -315,7 +315,7 @@ func (p *Pool[T]) Kill()
 Kill immediately stops all workers in the pool. It cancels the context, causing all worker goroutines to exit. Any ongoing tasks may be left unfinished. This method is useful for emergency shutdown scenarios.
 
 <a name="Pool[T].SetErrorHandler"></a>
-### func \(\*Pool\[T\]\) [SetErrorHandler](<https://github.com/atomicgo/pool/blob/main/pool.go#L70>)
+### func \(\*Pool\[T\]\) [SetErrorHandler](<https://github.com/atomicgo/pool/blob/main/pool.go#L72>)
 
 ```go
 func (p *Pool[T]) SetErrorHandler(handler ErrorHandler[T]) *Pool[T]
@@ -324,7 +324,7 @@ func (p *Pool[T]) SetErrorHandler(handler ErrorHandler[T]) *Pool[T]
 SetErrorHandler sets a custom error handling function for the pool. It is optional. The error handler allows custom logic to be executed when a task processing results in an error. \- handler: The function to be called when a task encounters an error.
 
 <a name="Pool[T].SetHandler"></a>
-### func \(\*Pool\[T\]\) [SetHandler](<https://github.com/atomicgo/pool/blob/main/pool.go#L62>)
+### func \(\*Pool\[T\]\) [SetHandler](<https://github.com/atomicgo/pool/blob/main/pool.go#L64>)
 
 ```go
 func (p *Pool[T]) SetHandler(handler func(context.Context, T) error) *Pool[T]
@@ -333,7 +333,7 @@ func (p *Pool[T]) SetHandler(handler func(context.Context, T) error) *Pool[T]
 SetHandler sets the task handling function for the pool. It must be called before starting the pool. The handler function takes a context \(for timeout control\) and a task of type T, and returns an error. \- handler: The function that will be called to process each task.
 
 <a name="Pool[T].Start"></a>
-### func \(\*Pool\[T\]\) [Start](<https://github.com/atomicgo/pool/blob/main/pool.go#L77>)
+### func \(\*Pool\[T\]\) [Start](<https://github.com/atomicgo/pool/blob/main/pool.go#L79>)
 
 ```go
 func (p *Pool[T]) Start()
